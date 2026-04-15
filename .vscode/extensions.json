@@ -1,0 +1,7 @@
+{
+  "recommendations": [
+    "ms-python.black-formatter",
+    "janisdd.vscode-edit-csv",
+    "mechatroner.rainbow-csv"
+  ]
+}

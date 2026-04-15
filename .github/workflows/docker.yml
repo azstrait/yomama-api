@@ -1,0 +1,95 @@
+name: Docker Publish
+
+on:
+  push:
+    tags:
+      - "v*"
+      - "*.*.*"   # matches semantic versions like 1.0.0
+
+jobs:
+  docker-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    env:
+      IMAGE_NAME: ghcr.io/azstrait/yomama-api
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+          pip install black pytest
+
+      - name: Lint with Black
+        run: |
+          black --check .
+
+      - name: Run tests
+        run: |
+          pytest
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Compute image tags
+        id: vars
+        run: |
+          # Raw tag: e.g. "v1.2.3" or "1.2.3"
+          RAW_TAG="${GITHUB_REF_NAME}"
+
+          # Strip leading "v" if present
+          VERSION="${RAW_TAG#v}"
+
+          # Split into major, minor, patch
+          IFS='.' read -r MAJOR MINOR PATCH <<EOF
+          ${VERSION}
+          EOF
+
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+
+          echo "raw_tag=${RAW_TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "major=${MAJOR}" >> $GITHUB_OUTPUT
+          echo "minor=${MAJOR}.${MINOR}" >> $GITHUB_OUTPUT
+          echo "patch=${VERSION}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Build and push multi-arch image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          platforms: linux/amd64,linux/arm64
+          push: true
+          provenance: false
+          tags: |
+            ${{ env.IMAGE_NAME }}:v${{ steps.vars.outputs.major }}
+            ${{ env.IMAGE_NAME }}:v${{ steps.vars.outputs.minor }}
+            ${{ env.IMAGE_NAME }}:v${{ steps.vars.outputs.patch }}
+            ${{ env.IMAGE_NAME }}:latest
+            ${{ env.IMAGE_NAME }}:build-${{ steps.vars.outputs.short_sha }}
+          labels: |
+            org.opencontainers.image.source=${{ github.repository }}
+            org.opencontainers.image.version=${{ steps.vars.outputs.version }}
+            org.opencontainers.image.revision=${{ github.sha }}

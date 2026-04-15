@@ -1,0 +1,16 @@
+name: yomama
+services:
+  yomama-api:
+    image: ghcr.io/azstrait/yomama-api
+    container_name: yomama-api
+    ports:
+      - 6262:6262
+    environment:
+      - DATA_DIR=/data # can be changed using env vars
+      - PORT=6262
+      - LOG_LEVEL=info # make this and DOWNLOADABLE_JOKES values case-insensitive
+      - DOWNLOADABLE_JOKES=true
+      - RELOAD=true
+    volumes:
+      - ./data:/data # if it doesn't contain a jokes.csv, create one in this directory
+    restart: unless-stopped
