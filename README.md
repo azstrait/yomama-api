@@ -247,7 +247,7 @@ Notes:
 
 The repository uses semantic-style version tags to drive Docker builds via GitHub Actions.
 
-The “Docker” workflow will:
+The “Docker Publish” workflow will:
 
 1. Run lint (Black) and tests (pytest).
 2. Build a multi-arch image (`linux/amd64`, `linux/arm64`) from `docker/Dockerfile`.
