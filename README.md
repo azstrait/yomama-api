@@ -20,7 +20,7 @@ If you use [The Lounge](https://thelounge.chat/), check out the companion plugin
 - Simple HTML/JS frontend at `/`:
   - Category dropdown (or “Any category”).
   - “Get Random Joke” button.
-  - “Copy Joke” button.
+  - “Copy Joke” button. (only works on secure connections, `http://localhost`, and `http://127.0.0.1`)
 - Jokes stored in `jokes.csv` (or `jokes.tsv`).
 - API responses:
   - `GET /api/random` → random joke (any category).
