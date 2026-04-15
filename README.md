@@ -303,6 +303,7 @@ Contributions are welcome!
 
    ```bash
    pip install -r requirements.txt
+   pip install pytest black
    ```
 
 3. Run tests:
@@ -325,7 +326,14 @@ Contributions are welcome!
   git checkout -b feature/my-cool-thing
   ```
 
-- Modify code, templates, or jokes.
+- Modify code or jokes.
+
+> [!IMPORTANT]
+> If contributing jokes, the following formatting rules must be followed:
+  1. `id` column **must** be an unquoted integer.
+  2. `joke` and `category` columns **must** be enclosed in double quotes.
+  3. `joke` column **must** begin with `Yo mama is` or `Yo mama's <noun>`.
+
 - Update or add tests.
 - Ensure:
 
