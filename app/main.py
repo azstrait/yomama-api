@@ -7,6 +7,8 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from contextlib import asynccontextmanager
 from starlette.status import HTTP_404_NOT_FOUND, HTTP_500_INTERNAL_SERVER_ERROR
+from starlette.middleware.base import BaseHTTPMiddleware
+from starlette.responses import Response
 from pathlib import Path
 from fastapi_swagger_ui_theme import setup_swagger_ui_theme
 
@@ -70,7 +72,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Yo Mama Jokes API",
     description='RESTful Web App and API for "Yo Mama" Jokes!',
-    version="1.0.0",
+    version="1.1.0",
+    servers=[
+        {"url": "https://yomama.dev", "description": "yomama.dev"},
+        {"url": "http://localhost:6262", "description": "local development"},
+    ],
     openapi_tags=[
         {"name": "Jokes", "description": "Endpoints for getting jokes and categories."},
         {"name": "System", "description": "Health and system-related endpoints."},
@@ -93,6 +99,28 @@ setup_swagger_ui_theme(
         "defaultModelsExpandDepth": "1",
     },
 )
+
+
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response: Response = await call_next(request)
+        # Basic security headers
+        response.headers["X-Content-Type-Options"] = "nosniff"
+        response.headers["X-Frame-Options"] = "DENY"
+        response.headers["Referrer-Policy"] = "no-referrer"
+        # Strict CSP; adjust if you later use CDNs or inline scripts
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self'; "
+            "style-src 'self'; "
+            "img-src 'self' data:; "
+            "connect-src 'self'; "
+            "frame-ancestors 'none'; "
+        )
+        return response
+
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 joke_store = JokeDataStore()
 
