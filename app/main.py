@@ -23,7 +23,7 @@ LOG_LEVEL = settings.LOG_LEVEL.upper()
 
 LOGGING_CONFIG = {
     "version": 1,
-    "disable_existing_loggers": False,  # keep stdlib loggers, but we reconfigure them
+    "disable_existing_loggers": False,  # keep stdlib loggers, but reconfigure them
     "formatters": {
         "default": {
             "format": "%(asctime)s [%(levelname)s] %(name)s: %(message)s",
@@ -39,11 +39,11 @@ LOGGING_CONFIG = {
         "level": LOG_LEVEL,
         "handlers": ["console"],
     },
-    # Optionally tune specific loggers
+    # tune specific loggers
     "loggers": {
-        # Reduce noise from uvicorn access log (we'll also disable access-log below)
+        # less noise from uvicorn access log (disable access-log below)
         "uvicorn.access": {"level": "WARNING"},
-        # Application logger (we'll use app_logger = logging.getLogger("yomama"))
+        # app logger (app_logger = logging.getLogger("yomama"))
         "yomama": {"level": LOG_LEVEL, "handlers": ["console"], "propagate": False},
     },
 }
