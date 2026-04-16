@@ -74,7 +74,7 @@ app = FastAPI(
     description='RESTful Web App and API for "Yo Mama" Jokes!',
     version="1.1.0",
     servers=[
-        {"url": "https://yomama.dev", "description": "yomama.dev"},
+        {"url": "https://yomama.dev", "description": "public server"},
         {"url": "http://localhost:6262", "description": "local development"},
     ],
     openapi_tags=[
@@ -97,6 +97,7 @@ setup_swagger_ui_theme(
         "docExpansion": "list",
         "apis": "ApisPreset",
         "defaultModelsExpandDepth": "1",
+        "validatorUrl": "https://validator.swagger.io/validator",
     },
 )
 
@@ -104,23 +105,39 @@ setup_swagger_ui_theme(
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
     async def dispatch(self, request, call_next):
         response: Response = await call_next(request)
-        # Basic security headers
+
+        path = request.url.path
+
+        # Base headers
         response.headers["X-Content-Type-Options"] = "nosniff"
         response.headers["X-Frame-Options"] = "DENY"
         response.headers["Referrer-Policy"] = "no-referrer"
-        # Strict CSP; adjust if you later use CDNs or inline scripts
-        response.headers["Content-Security-Policy"] = (
-            "default-src 'self'; "
-            "script-src 'self'; "
-            "style-src 'self'; "
-            "img-src 'self' data:; "
-            "connect-src 'self'; "
-            "frame-ancestors 'none'; "
-        )
+
+        if path.startswith("/docs") or path.startswith("/swagger-ui-theme-static"):
+            # Swagger UI: needs inline scripts/styles
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self' 'unsafe-inline' https://unpkg.com; "
+                "style-src 'self' 'unsafe-inline' https://unpkg.com; "
+                "img-src 'self' data: https://fastapi.tiangolo.com; "
+                "connect-src 'self' https://unpkg.com; "
+                "font-src 'self' data:; "
+                "frame-ancestors 'none'; "
+            )
+        else:
+            # Rest of the app can be stricter
+            response.headers["Content-Security-Policy"] = (
+                "default-src 'self'; "
+                "script-src 'self'; "
+                "style-src 'self'; "
+                "img-src 'self' data:; "
+                "connect-src 'self'; "
+                "frame-ancestors 'none'; "
+            )
+
         return response
-
-
 app.add_middleware(SecurityHeadersMiddleware)
+
 
 joke_store = JokeDataStore()
 
@@ -188,15 +205,56 @@ async def get_jokes_file():
 @app.get(
     "/api/random",
     response_model=JokeResponse,
+    summary="Random Joke",
     responses={
+        200: {
+            "description": "Random joke from any category",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "random-success": {
+                            "summary": "Successfully returns a random joke",
+                            "value": {
+                                "status": "success",
+                                "id": 42,
+                                "joke": "Yo mama is so old, her first car was a chariot.",
+                                "category": "old",
+                            },
+                        }
+                    }
+                }
+            },
+        },
         404: {
             "model": ErrorResponse,
             "description": "No jokes found",
             "content": {
                 "application/json": {
-                    "example": {
-                        "status": "failure",
-                        "message": "No jokes found",
+                    "examples": {
+                        "no-jokes": {
+                            "summary": "No jokes available",
+                            "value": {
+                                "status": "failure",
+                                "message": "No jokes found",
+                            },
+                        }
+                    }
+                }
+            },
+        },
+        500: {
+            "model": ErrorResponse,
+            "description": "Server error",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "server-error": {
+                            "summary": "Generic server error",
+                            "value": {
+                                "status": "failure",
+                                "message": "Internal server error",
+                            },
+                        }
                     }
                 }
             },
@@ -233,15 +291,39 @@ async def get_random_joke() -> JokeResponse:
 @app.get(
     "/api/random/{category}",
     response_model=JokeResponse,
+    summary="Random Joke by Category",
     responses={
+        200: {
+            "description": "Random joke from the specified category",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "category-success": {
+                            "summary": "Successfully returns a categorized joke",
+                            "value": {
+                                "status": "success",
+                                "id": 7,
+                                "joke": "Yo mama is so fat, when she sits around the house, she sits AROUND the house.",
+                                "category": "fat",
+                            },
+                        }
+                    }
+                }
+            },
+        },
         404: {
             "model": ErrorResponse,
             "description": "Category not found or has no jokes",
             "content": {
                 "application/json": {
-                    "example": {
-                        "status": "failure",
-                        "message": "Category not found or has no jokes",
+                    "examples": {
+                        "category-not-found": {
+                            "summary": "Category not found",
+                            "value": {
+                                "status": "failure",
+                                "message": "Category not found or has no jokes",
+                            },
+                        }
                     }
                 }
             },
@@ -251,9 +333,14 @@ async def get_random_joke() -> JokeResponse:
             "description": "Invalid category",
             "content": {
                 "application/json": {
-                    "example": {
-                        "status": "failure",
-                        "message": "Invalid category supplied",
+                    "examples": {
+                        "invalid-category": {
+                            "summary": "Invalid category parameter",
+                            "value": {
+                                "status": "failure",
+                                "message": "Invalid category supplied",
+                            },
+                        }
                     }
                 }
             },
@@ -263,9 +350,14 @@ async def get_random_joke() -> JokeResponse:
             "description": "Server error",
             "content": {
                 "application/json": {
-                    "example": {
-                        "status": "failure",
-                        "message": "Internal server error",
+                    "examples": {
+                        "server-error": {
+                            "summary": "Generic server error",
+                            "value": {
+                                "status": "failure",
+                                "message": "Internal server error",
+                            },
+                        }
                     }
                 }
             },
@@ -303,15 +395,38 @@ async def get_random_joke_by_category(category: str) -> JokeResponse:
 @app.get(
     "/api/categories",
     response_model=CategoriesResponse,
+    summary="Categories List & Count",
     responses={
+        200: {
+            "description": "List of all categories with a count",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "categories-success": {
+                            "summary": "Categories list",
+                            "value": {
+                                "status": "success",
+                                "categories": ["old", "fat", "ugly"],
+                                "category_count": 3,
+                            },
+                        }
+                    }
+                }
+            },
+        },
         404: {
             "model": ErrorResponse,
             "description": "No categories found",
             "content": {
                 "application/json": {
-                    "example": {
-                        "status": "failure",
-                        "message": "No categories found",
+                    "examples": {
+                        "no-categories": {
+                            "summary": "No categories available",
+                            "value": {
+                                "status": "failure",
+                                "message": "No categories found",
+                            },
+                        }
                     }
                 }
             },
@@ -321,9 +436,14 @@ async def get_random_joke_by_category(category: str) -> JokeResponse:
             "description": "Server error",
             "content": {
                 "application/json": {
-                    "example": {
-                        "status": "failure",
-                        "message": "Internal server error",
+                    "examples": {
+                        "categories-server-error": {
+                            "summary": "Generic server error",
+                            "value": {
+                                "status": "failure",
+                                "message": "Internal server error",
+                            },
+                        }
                     }
                 }
             },
@@ -333,7 +453,7 @@ async def get_random_joke_by_category(category: str) -> JokeResponse:
 )
 async def get_categories() -> CategoriesResponse:
     """
-    Get a list of all categories.
+    Get a list and count of all categories.
     """
     try:
         categories = joke_store.get_categories()
@@ -358,7 +478,35 @@ async def get_categories() -> CategoriesResponse:
     )
 
 
-@app.get("/health", response_model=HealthResponse, tags=["System"])
+@app.get(
+    "/health",
+    response_model=HealthResponse,
+    summary="System Health Info",
+    responses={
+        200: {
+            "description": "Health status information",
+            "content": {
+                "application/json": {
+                    "examples": {
+                        "health-ok": {
+                            "summary": "Healthy state",
+                            "value": {
+                                "status": "ok",
+                                "app_name": "Yo Mama Jokes API",
+                                "version": "1.1.0",
+                                "jokes_loaded": True,
+                                "joke_count": 123,
+                                "category_count": 7,
+                                "environment": "production",
+                            },
+                        }
+                    }
+                }
+            },
+        }
+    },
+    tags=["System"],
+)
 async def health() -> HealthResponse:
     """
     Basic health check: reports app status and whether jokes are loaded.
