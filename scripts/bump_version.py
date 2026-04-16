@@ -7,7 +7,9 @@ import sys
 ROOT = Path(__file__).resolve().parents[1]
 VERSION_FILE = ROOT / "app" / "version.py"
 
-VERSION_RE = re.compile(r'^__version__\s*=\s*["\'](?P<version>\d+\.\d+\.\d+)["\']\s*$', re.MULTILINE)
+VERSION_RE = re.compile(
+    r'^__version__\s*=\s*["\'](?P<version>\d+\.\d+\.\d+)["\']\s*$', re.MULTILINE
+)
 
 
 def get_current_version() -> str:
