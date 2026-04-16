@@ -452,6 +452,18 @@ body.loading {
   .controls {
     margin-top: 0.5rem;
   }
+
+  .footer {
+    grid-template-columns: 1fr;   /* single column */
+    row-gap: 0.35rem;
+  }
+
+  .footer-left,
+  .footer-center,
+  .footer-right {
+    justify-self: center;
+    text-align: center;
+  }
 }
 
 /* Swagger UI dark mode tweaks */
