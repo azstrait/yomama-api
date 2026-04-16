@@ -72,7 +72,12 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Yo Mama Jokes API",
-    description='RESTful Web App and API for "Yo Mama" Jokes!',
+    description=(
+        'RESTful Web App and API for "Yo Mama" Jokes!\n\n'
+        "- The public server (`https://yomama.dev`) is rate-limited (~1 req/sec). "
+        "You may receive HTTP 429 responses from that instance.\n"
+        "- Self-hosted instances typically will not return 429 unless fronted by a rate limiter."
+    ),
     version=__version__,
     servers=[
         {"url": "https://yomama.dev", "description": "public server"},
@@ -589,6 +594,7 @@ def custom_openapi():
         version=__version__,
         description=app.description,
         routes=app.routes,
+        servers=app.servers,
     )
 
     # Remove the default validation error schemas if present
