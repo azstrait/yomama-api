@@ -49,6 +49,16 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await res.json().catch(() => null);
 
       if (!res.ok) {
+        // Handle Cloudflare / rate limiting specifically
+        if (res.status === 429) {
+          const msg =
+            "Too many requests. This instance is rate-limited. " +
+            "Please slow down and try again in a moment.";
+          setStatus(msg, "error");
+          throw new Error(msg);
+        }
+
+        // All other errors
         const msg = data?.message || `Request failed with status ${res.status}`;
         setStatus(msg, "error");
         throw new Error(msg);

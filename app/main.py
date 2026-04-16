@@ -543,7 +543,7 @@ async def health() -> HealthResponse:
     return HealthResponse(
         status="ok" if jokes_loaded else "degraded",
         app_name=app.title,
-        version=app.version,
+        version=__version__,
         jokes_loaded=jokes_loaded,
         joke_count=joke_count,
         category_count=category_count,
@@ -586,7 +586,7 @@ def custom_openapi():
 
     openapi_schema = get_openapi(
         title=app.title,
-        version=app.version,
+        version=__version__,
         description=app.description,
         routes=app.routes,
     )
