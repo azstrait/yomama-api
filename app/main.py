@@ -138,6 +138,8 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             )
 
         return response
+
+
 app.add_middleware(SecurityHeadersMiddleware)
 
 
