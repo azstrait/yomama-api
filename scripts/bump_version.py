@@ -23,6 +23,7 @@ def get_current_version() -> str:
 def set_version(new_version: str) -> None:
     text = VERSION_FILE.read_text(encoding="utf-8")
     new_text = VERSION_RE.sub(f'__version__ = "{new_version}"', text)
+    new_text = new_text.rstrip("\n") + "\n"
     VERSION_FILE.write_text(new_text, encoding="utf-8")
 
 

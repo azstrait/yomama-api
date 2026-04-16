@@ -8,6 +8,7 @@ from fastapi.testclient import TestClient
 
 from app.main import app, joke_store
 from app.config import get_settings
+from app.version import __version__
 
 
 @contextmanager
@@ -171,7 +172,7 @@ def test_health_endpoint_includes_category_count():
     data = response.json()
     assert data["status"] in ("ok", "degraded")
     assert data["app_name"] == "Yo Mama Jokes API"
-    assert data["version"] == "1.0.0"
+    assert data["version"] == __version__
     assert isinstance(data["jokes_loaded"], bool)
     assert isinstance(data["joke_count"], int)
     assert isinstance(data["category_count"], int)
