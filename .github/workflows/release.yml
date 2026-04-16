@@ -1,0 +1,88 @@
+name: GitHub Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    needs: docker-publish  # depend on Docker Publish job if in same workflow
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Extract version and tags
+        id: vars
+        run: |
+          RAW_TAG="${GITHUB_REF_NAME}"              # e.g. v1.2.3
+          VERSION="${RAW_TAG#v}"                    # 1.2.3
+          MAJOR="${VERSION%%.*}"                    # 1
+          MINOR="${VERSION%.*}"                     # 1.2
+          SHORT_SHA="$(git rev-parse --short HEAD)"
+
+          echo "raw_tag=${RAW_TAG}" >> $GITHUB_OUTPUT
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+          echo "major=${MAJOR}" >> $GITHUB_OUTPUT
+          echo "minor=${MINOR}" >> $GITHUB_OUTPUT
+          echo "patch=${VERSION}" >> $GITHUB_OUTPUT
+          echo "short_sha=${SHORT_SHA}" >> $GITHUB_OUTPUT
+
+      - name: Generate release body
+        id: body
+        run: |
+          VERSION="${{ steps.vars.outputs.version }}"
+          MAJOR="${{ steps.vars.outputs.major }}"
+          MINOR="${{ steps.vars.outputs.minor }}"
+          PATCH="${{ steps.vars.outputs.patch }}"
+          SHORT_SHA="${{ steps.vars.outputs.short_sha }}"
+
+          cat << 'EOF' > RELEASE_BODY.md
+          <!-- Optional message under the release title -->
+          A new version of **yomama-api** is out! 🎉
+
+          ## Changelog
+
+          <!-- GitHub can generate notes here, or you can paste manually. -->
+          <!-- If using auto-generated notes, this section will be replaced. -->
+
+          ## Docker Tags
+
+          The following Docker tags are available for this release:
+
+          - `ghcr.io/azstrait/yomama-api:vMAJOR`
+          - `ghcr.io/azstrait/yomama-api:vMINOR`
+          - `ghcr.io/azstrait/yomama-api:vPATCH`
+          - `ghcr.io/azstrait/yomama-api:latest`
+          - `ghcr.io/azstrait/yomama-api:build-SHORT_SHA`
+
+          ## Usage
+
+          See the README for `docker-compose.yml` examples and environment variables.
+          EOF
+
+          # Replace placeholders
+          sed -i "s/vMAJOR/v${MAJOR}/g" RELEASE_BODY.md
+          sed -i "s/vMINOR/v${MINOR}/g" RELEASE_BODY.md
+          sed -i "s/vPATCH/v${PATCH}/g" RELEASE_BODY.md
+          sed -i "s/SHORT_SHA/${SHORT_SHA}/g" RELEASE_BODY.md
+
+          echo "body_path=RELEASE_BODY.md" >> $GITHUB_OUTPUT
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.vars.outputs.raw_tag }}
+          name: yomama-api v${{ steps.vars.outputs.version }}
+          body_path: ${{ steps.body.outputs.body_path }}
+          draft: false
+          prerelease: false
+          generate_release_notes: true
+          files: |
+            docker-compose.yml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
