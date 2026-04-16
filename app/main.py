@@ -497,14 +497,26 @@ async def get_categories() -> CategoriesResponse:
                             "summary": "Healthy state",
                             "value": {
                                 "status": "ok",
-                                "app_name": "Yo Mama Jokes API",
-                                "version": "1.1.0",
+                                "app_name": app.title,
+                                "version": __version__,
                                 "jokes_loaded": True,
                                 "joke_count": 123,
                                 "category_count": 7,
                                 "environment": "production",
                             },
-                        }
+                        },
+                        "health-not-ok": {
+                            "summary": "Unhealthy state",
+                            "value": {
+                                "status": "degraded",
+                                "app_name": app.title,
+                                "version": __version__,
+                                "jokes_loaded": True,
+                                "joke_count": 123,
+                                "category_count": 7,
+                                "environment": "production",
+                            },
+                        },
                     }
                 }
             },
