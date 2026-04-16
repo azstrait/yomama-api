@@ -1,6 +1,24 @@
-# Yo Mama Jokes API
+<p align="center">
+  <img src=".github/logo.png" alt="Yo Mama Jokes" width="200" />
+</p>
 
-A self-hostable RESTful web app + API for “Yo Mama” jokes, powered by FastAPI and backed by a simple CSV/TSV file.
+<h1 align="center">Yo Mama Jokes API</h1>
+
+<p align="center">
+  A self-hostable RESTful web app + API for “Yo Mama” jokes, powered by FastAPI and backed by a simple CSV/TSV file.
+</p>
+
+<p align="center">
+  <a href="https://yomama.dev" target="_blank" rel="noreferrer">
+    Public Instance: <code>https://yomama.dev</code>
+  </a>
+</p>
+
+<p align="center">
+  <img src=".github/screenshot.png" alt="Yo Mama Jokes Screenshot" width="600" />
+</p>
+
+---
 
 - Live website UI: lets you pick a category (or any category) and fetch jokes with a single click.
 - JSON API: `/api/random`, `/api/random/{category}`, and `/api/categories`.
@@ -14,13 +32,27 @@ If you use [The Lounge](https://thelounge.chat/), check out the companion plugin
 
 ---
 
+## Public Instance
+
+A public instance is available at:
+
+- **Web UI:** `https://yomama.dev`
+- **API base URL:** `https://yomama.dev`
+
+Notes:
+
+- The public instance is **rate-limited** (e.g. to about 1 request/second). If you exceed this, you may see HTTP `429 Too Many Requests` responses.
+- For heavy or automated use, please self-host (see the Docker section below).
+
+---
+
 ## Features
 
 - FastAPI backend with auto-generated Swagger UI at `/docs`.
 - Simple HTML/JS frontend at `/`:
   - Category dropdown (or “Any category”).
   - “Get Random Joke” button.
-  - “Copy Joke” button. (only works on secure connections, `http://localhost`, and `http://127.0.0.1`)
+  - “Copy Joke” button (only works on secure connections, `http://localhost`, and `http://127.0.0.1`).
 - Jokes stored in `jokes.csv` (or `jokes.tsv`).
 - API responses:
   - `GET /api/random` → random joke (any category).
@@ -92,13 +124,13 @@ services:
     ports:
       - "6262:6262"
     environment:
-        # the directory (inside the container) where it looks for jokes.csv
+      # the directory (inside the container) where it looks for jokes.csv
       - DATA_DIR=/data
-        # the port the UI runs on
+      # the port the UI runs on
       - PORT=6262
-        # Can be one of: debug, info, warning, error, critical
+      # Can be one of: debug, info, warning, error, critical
       - LOG_LEVEL=info            # case-insensitive (info/INFO/Info)
-        # whether to include a link to jokes.csv on the homepage
+      # whether to include a link to jokes.csv on the homepage
       - DOWNLOADABLE_JOKES=true   # case-insensitive (true/1/yes/...)
       - RELOAD=true               # watches jokes.csv file for changes
                                   # and reloads the API automatically
@@ -180,7 +212,8 @@ id,joke,category
 1,"Yo mama so old, her first car was a chariot.","old"
 2,"Yo mama so fat, when she sits around the house, she sits AROUND the house.","fat"
 ```
-> [!NOTE]
+
+> [!NOTE]  
 > Be sure to encase jokes with double quotes so any commas contained in them don't break the CSV formatting.
 
 ### 5. Run the app (development)
@@ -196,7 +229,7 @@ By default:
 - Listens on `http://0.0.0.0:6262`. (`PORT=6262`)
 - Reloads on code changes.
 - Logs at `LOG_LEVEL` (default: `INFO`).
-- Environment variable can be set by running them before `python run.py`:
+- Environment variables can be set by running them before `python run.py`:
   ```bash
   LOG_LEVEL=warning python run.py
   ```
@@ -221,16 +254,16 @@ These can be used both:
 - **From source** (via shell env vars before running `run.py`).
 - **In Docker** (via `environment:` in compose or `-e` in `docker run`).
 
-| Variable             | Default  | Description                                                                                          | Possible values                                     |
-|----------------------|----------|------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
-| `DATA_DIR`           | `/data`  | Directory containing `jokes.csv` or `jokes.tsv`. In Docker, the container side of a bind mount.          | Any valid directory path.                           |
-| `JOKES_CSV_FILENAME` | `jokes.csv` | Name of the CSV jokes file within `DATA_DIR`.                                                       | Any filename; must match actual file.               |
-| `JOKES_TSV_FILENAME` | `jokes.tsv` | Name of the TSV jokes file within `DATA_DIR`.                                                       | Any filename; must match actual file.               |
-| `DOWNLOADABLE_JOKES` | `false`  | Whether the UI and `/data/jokes` endpoint expose the jokes file.                                     | `true`, `1`, `yes`, `y` → enabled; anything else → disabled. Case-insensitive. |
-| `PORT`               | `6262`   | TCP port the app listens on.                                                                         | Any valid port (e.g. `8000`, `8080`).               |
-| `LOG_LEVEL`          | `INFO`   | Logging level for the app and Uvicorn.                                                              | `debug`, `info`, `warning`, `error`, `critical` (case-insensitive). |
+| Variable             | Default  | Description                                                                                              | Possible values                                     |
+|----------------------|----------|----------------------------------------------------------------------------------------------------------|-----------------------------------------------------|
+| `DATA_DIR`           | `/data`  | Directory containing `jokes.csv` or `jokes.tsv`. In Docker, the container side of a bind mount.         | Any valid directory path.                           |
+| `JOKES_CSV_FILENAME` | `jokes.csv` | Name of the CSV jokes file within `DATA_DIR`.                                                           | Any filename; must match actual file.               |
+| `JOKES_TSV_FILENAME` | `jokes.tsv` | Name of the TSV jokes file within `DATA_DIR`.                                                           | Any filename; must match actual file.               |
+| `DOWNLOADABLE_JOKES` | `false`  | Whether the UI and `/data/jokes` endpoint expose the jokes file.                                        | `true`, `1`, `yes`, `y` → enabled; anything else → disabled. Case-insensitive. |
+| `PORT`               | `6262`   | TCP port the app listens on.                                                                             | Any valid port (e.g. `8000`, `8080`).               |
+| `LOG_LEVEL`          | `INFO`   | Logging level for the app and Uvicorn.                                                                  | `debug`, `info`, `warning`, `error`, `critical` (case-insensitive). |
 | `RELOAD`             | `true` (in container-run) / controlled by `run.py` in dev | In container mode, controls whether Uvicorn reloads on changes to jokes file. In dev `run.py`, reload is always on. | `true`, `1`, `yes`, `y` → reload enabled; anything else → disabled. |
-| `ENVIRONMENT`        | `production` (currently unused but available in health) | Optional environment label used in `/health` if you choose to wire it.                          | e.g. `development`, `staging`, `production`.        |
+| `ENVIRONMENT`        | `production` (currently unused but available in health) | Optional environment label used in `/health` if you choose to wire it.                              | e.g. `development`, `staging`, `production`.        |
 
 Notes:
 
@@ -243,11 +276,11 @@ Notes:
 
 ---
 
-## Version Tagging and Docker Images
+## Releases and Docker Images
 
 The repository uses semantic-style version tags to drive Docker builds via GitHub Actions.
 
-The “Docker Publish” workflow will:
+On a new version tag (e.g. `v1.2.3`), the “Publish” workflow will:
 
 1. Run lint (Black) and tests (pytest).
 2. Build a multi-arch image (`linux/amd64`, `linux/arm64`) from `docker/Dockerfile`.
@@ -266,99 +299,16 @@ This makes it easy to pin:
 - Exact patch: `v1.2.3`
 - Or always follow the latest: `latest`.
 
-Non-tag pushes/PRs do **not** publish images; they only run the “CI” workflow (lint + tests).
+You can browse all published images here:
+
+- **GHCR packages:**  
+  <https://github.com/azstrait/yomama-api/pkgs/container/yomama-api>
 
 ---
 
 ## Contributing
 
-Contributions are welcome!
-
-### 1. Fork and Clone
-
-1. Fork the repo on GitHub.
-2. Clone your fork:
-
-   ```bash
-   git clone https://github.com/<your-username>/yomama-api.git
-   cd yomama-api
-   ```
-
-3. Add the original repo as upstream:
-
-   ```bash
-   git remote add upstream https://github.com/azstrait/yomama-api.git
-   ```
-
-### 2. Set Up Dev Environment
-
-1. Create and activate a virtual environment:
-
-   ```bash
-   python3 -m venv .venv
-   source .venv/bin/activate
-   ```
-
-2. Install dependencies:
-
-   ```bash
-   pip install -r requirements.txt
-   pip install pytest black
-   ```
-
-3. Run tests:
-
-   ```bash
-   pytest
-   ```
-
-4. Lint:
-
-   ```bash
-   black .
-   ```
-
-### 3. Make Your Changes
-
-- Create a feature branch:
-
-  ```bash
-  git checkout -b feature/my-cool-thing
-  ```
-
-- Modify code or jokes.
-
-> [!IMPORTANT]
-> If contributing jokes, the following formatting rules must be followed:
-  1. `id` column **must** be an unquoted integer.
-  2. `joke` and `category` columns **must** be enclosed in double quotes.
-  3. `joke` column **must** begin with `Yo mama is` or `Yo mama's <noun>`.
-
-- Update or add tests.
-- Ensure:
-
-  ```bash
-  black .
-  pytest
-  ```
-
-  both succeed.
-
-### 4. Open a Pull Request
-
-- Push your branch:
-
-  ```bash
-  git push origin feature/my-cool-thing
-  ```
-
-- Open a PR against `azstrait/yomama-api:main`.
-- Describe:
-  - What you changed.
-  - Why you changed it.
-  - Any relevant notes.
-
-The CI workflow will automatically run lint and tests on your PR.
+Contributions are welcome! Please see [CONTRIBUTING.md](./CONTRIBUTING.md) for details on how to contribute, code style, and joke formatting rules.
 
 ---
 
