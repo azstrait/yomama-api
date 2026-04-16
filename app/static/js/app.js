@@ -168,3 +168,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   loadCategories();
 });
+
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("/static/sw.js")
+      .catch((err) => console.error("SW registration failed:", err));
+  });
+}
