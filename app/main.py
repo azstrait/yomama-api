@@ -88,7 +88,7 @@ app = FastAPI(
 setup_swagger_ui_theme(
     app,
     docs_path="/docs",
-    title="Yo Mama Jokes API",
+    title=app.title,
     static_mount_path="/swagger-ui-theme-static",
     swagger_favicon_url=None,
     oauth2_redirect_url=None,
@@ -162,6 +162,7 @@ async def read_root(request: Request) -> HTMLResponse:
         context={
             "request": request,
             "expose_jokes_file": settings.DOWNLOADABLE_JOKES,
+            "version": app.version,
         },
         status_code=200,
     )

@@ -369,7 +369,7 @@ body.loading {
   color: #888888;
 
   display: grid;
-  grid-template-columns: auto 1fr auto; /* left | center (flex) | right */
+  grid-template-columns: auto minmax(0, 1fr) auto; /* left | wide center | right */
   align-items: center;
   column-gap: 0.75rem;
 }
@@ -377,9 +377,12 @@ body.loading {
 /* Left: stays on the left edge */
 .footer-left {
   justify-self: start;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
 }
 
-/* Center: centered in the available space */
+/* Center: truly centered on the page */
 .footer-center {
   justify-self: center;
   text-align: center;
@@ -390,6 +393,9 @@ body.loading {
 .footer-right {
   justify-self: end;
   text-align: right;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
   white-space: nowrap;
 }
 
@@ -400,6 +406,10 @@ body.loading {
 
 .footer a:hover {
   text-decoration: underline;
+}
+
+.footer-separator {
+  opacity: 0.5;
 }
 
 /* --- Responsive tweaks --- */
