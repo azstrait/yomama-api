@@ -360,6 +360,27 @@ body.loading {
   text-decoration: underline;
 }
 
+/* Inline code styling (e.g., in API Endpoints list) */
+code {
+  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+    Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 0.85em;
+  background-color: rgba(15, 23, 42, 0.9);
+  color: #f4f4f4;
+  padding: 0.15rem 0.3rem;
+  border-radius: 0.25rem;
+  border: 1px solid rgba(148, 163, 184, 0.35);
+}
+
+/* reduce padding if code is inside headings */
+h1 code,
+h2 code,
+h3 code,
+h4 code {
+  font-size: 0.9em;
+  padding: 0.1rem 0.25rem;
+}
+
 /* --- Footer --- */
 .footer {
   margin-top: 1.5rem;

@@ -118,10 +118,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self' 'unsafe-inline' https://unpkg.com; "
-                "style-src 'self' 'unsafe-inline' https://unpkg.com; "
+                "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.cdnfonts.com; "
                 "img-src 'self' data: https://fastapi.tiangolo.com; "
                 "connect-src 'self' https://unpkg.com; "
-                "font-src 'self' data:; "
+                "font-src 'self' data: https://fonts.cdnfonts.com; "
                 "frame-ancestors 'none'; "
             )
         else:
@@ -129,9 +129,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
                 "script-src 'self'; "
-                "style-src 'self'; "
+                "style-src 'self' https://fonts.cdnfonts.com; "
                 "img-src 'self' data:; "
                 "connect-src 'self'; "
+                "font-src 'self' data: https://fonts.cdnfonts.com; "
                 "frame-ancestors 'none'; "
             )
 
