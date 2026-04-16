@@ -1,108 +1,121 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <title>Yo Mama Jokes</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="stylesheet" href="/static/css/style.css" />
-</head>
-<body>
-  <div class="page-wrap">
-    <header class="header">
-      <div class="header-top">
-        <div class="logo">
-          <span class="logo-icon">YM</span>
-          <span class="logo-text">Yo Mama Jokes</span>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Yo Mama Jokes</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="/static/css/style.css" />
+  </head>
+  <body>
+    <div class="page-wrap">
+      <header class="header">
+        <div class="header-top">
+          <div class="logo">
+            <span class="logo-icon">YM</span>
+            <span class="logo-text">Yo Mama Jokes</span>
+          </div>
+          <nav class="header-nav">
+            <a href="/docs" target="_blank" rel="noreferrer" class="nav-link">
+              API Docs
+            </a>
+          </nav>
         </div>
-        <nav class="header-nav">
-          <a href="/docs" target="_blank" rel="noreferrer" class="nav-link">
-            API Docs
-          </a>
-        </nav>
-      </div>
-      <div class="header-subtitle">
-        Randomized, API-powered “Yo Mama” jokes, served from a CSV/TSV of jokes.
-        {% if expose_jokes_file %}
-          Full joke list available <a href="/data/jokes" class="subtitle-link" target="_blank" rel="noreferrer">here</a>.
-        {% endif %}
-      </div>
-    </header>
-
-    <main class="main">
-      <section class="card">
-        <div class="card-header">
-          <h1 class="card-title">Need a joke?</h1>
-          <p class="card-subtitle">
-            Choose a category or go completely random.
-          </p>
+        <div class="header-subtitle">
+          Randomized, API-powered “Yo Mama” jokes, served from a CSV/TSV of jokes.
+          {% if expose_jokes_file %}
+          Full joke list available <a href="/data/jokes" class="subtitle-link"
+            target="_blank" rel="noreferrer">here</a>.
+          {% endif %}
         </div>
+      </header>
 
-        <div class="controls">
-          <label class="control-group">
-            <span class="control-label">Category</span>
-            <select id="categorySelect" class="select">
+      <main class="main">
+        <section class="card">
+          <div class="card-top">
+            <div class="card-top-left">
+              <div class="card-header">
+                <h1 class="card-title">Need a joke?</h1>
+                <p class="card-subtitle">
+                  Choose a category or go completely random!
+                </p>
+              </div>
+            </div>
+            <div class="card-top-right">
+              <div class="card-logo">
+                <img src="/static/img/logo.png" alt="Yo Mama Jokes" />
+              </div>
+            </div>
+          </div>
+
+          <div class="controls">
+            <label class="control-group">
+              <span class="control-label">Category</span>
+              <select id="categorySelect" class="select">
               <option value="">Any category</option>
-              <!-- Filled dynamically by app.js -->
-            </select>
-          </label>
+                <!-- Filled dynamically by app.js -->
+              </select>
+            </label>
 
-          <div class="button-row">
-            <button id="randomBtn" class="btn primary">
-              Get Random Joke
-            </button>
+            <div class="button-row">
+              <button id="randomBtn" class="btn primary">
+                Get Random Joke
+              </button>
+            </div>
           </div>
+
+          <div class="joke-container">
+            <div class="joke-meta">
+              <span id="jokeCategory" class="joke-tag">Category: —</span>
+              <span id="jokeId" class="joke-id">ID: —</span>
+            </div>
+            <div id="jokeDisplay" class="joke-box">
+              Click “Get Random Joke” to start laughing.
+            </div>
+            <div class="joke-actions">
+              <button id="copyBtn" class="btn secondary">
+                Copy Joke
+              </button>
+              <span id="copyStatus" class="copy-status"
+                aria-live="polite"></span>
+            </div>
+          </div>
+
+          <div class="status-bar">
+            <span id="statusMessage"></span>
+          </div>
+        </section>
+
+        <section class="info">
+          <h2>API Endpoints</h2>
+          <ul>
+          <li><code>GET /api/random</code> → random joke from any category</li>
+          <li><code>GET /api/random/{category}</code> → random joke from a specific category</li>
+          <li><code>GET /api/categories</code> → list of available categories</li>
+            <li><code>GET /health</code> → basic health check</li>
+          </ul>
+        </section>
+      </main>
+
+      <footer class="footer">
+        <div class="footer-left">
+          <a href="https://github.com/azstrait/yomama-api" target="_blank"
+            rel="noreferrer">
+            GitHub
+          </a>
         </div>
-
-        <div class="joke-container">
-          <div class="joke-meta">
-            <span id="jokeCategory" class="joke-tag">Category: —</span>
-            <span id="jokeId" class="joke-id">ID: —</span>
-          </div>
-          <div id="jokeDisplay" class="joke-box">
-            Click “Get Random Joke” to start laughing.
-          </div>
-          <div class="joke-actions">
-            <button id="copyBtn" class="btn secondary">
-              Copy Joke
-            </button>
-            <span id="copyStatus" class="copy-status" aria-live="polite"></span>
-          </div>
+        <div class="footer-center">
+          Self-hostable Yo Mama Jokes API
         </div>
-
-        <div class="status-bar">
-          <span id="statusMessage"></span>
+        <div class="footer-right">
+          Based on
+          <a href="https://www.yomama-jokes.com" target="_blank"
+            rel="noreferrer">
+            yomama-jokes.com
+          </a>
         </div>
-      </section>
+      </footer>
+    </div>
 
-      <section class="info">
-        <h2>API Endpoints</h2>
-        <ul>
-          <li><code>GET /api/random</code> – random joke from any category</li>
-          <li><code>GET /api/random/{category}</code> – random joke from a specific category</li>
-          <li><code>GET /api/categories</code> – list of available categories</li>
-          <li><code>GET /health</code> – basic health check</li>
-        </ul>
-      </section>
-    </main>
-
-    <footer class="footer">
-      <div class="footer-left">
-        <a href="https://github.com/azstrait/yomama-api" target="_blank" rel="noreferrer">
-          GitHub
-        </a>
-      </div>
-      <div class="footer-center">
-        Self-hostable Yo Mama Jokes API
-      </div>
-      <div class="footer-right">
-        Based on
-        <a href="https://www.yomama-jokes.com" target="_blank" rel="noreferrer">
-          yomama-jokes.com
-        </a>
-      </div>
-    </footer>
-  </div>
-
-  <script src="/static/js/app.js"></script>
-</body>
+    <script src="/static/js/app.js"></script>
+  </body>
 </html>
