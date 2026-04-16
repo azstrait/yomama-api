@@ -1,10 +1,7 @@
 name: Docker Publish
 
 on:
-  push:
-    tags:
-      - "v*"
-      - "*.*.*"   # matches semantic versions like 1.0.0
+  workflow_dispatch:
 
 jobs:
   docker-publish:

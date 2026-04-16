@@ -15,6 +15,7 @@ from fastapi_swagger_ui_theme import setup_swagger_ui_theme
 from .models import JokeResponse, CategoriesResponse, ErrorResponse, HealthResponse
 from .data_loader import JokeDataStore
 from .config import get_settings
+from .version import __version__
 
 settings = get_settings()
 
@@ -72,7 +73,7 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Yo Mama Jokes API",
     description='RESTful Web App and API for "Yo Mama" Jokes!',
-    version="1.1.0",
+    version=__version__,
     servers=[
         {"url": "https://yomama.dev", "description": "public server"},
         {"url": "http://localhost:6262", "description": "local development"},
@@ -163,7 +164,7 @@ async def read_root(request: Request) -> HTMLResponse:
         context={
             "request": request,
             "expose_jokes_file": settings.DOWNLOADABLE_JOKES,
-            "version": app.version,
+            "version": __version__,
         },
         status_code=200,
     )

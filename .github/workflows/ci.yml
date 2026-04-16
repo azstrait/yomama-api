@@ -6,7 +6,7 @@ on:
       - "**"       # all branches
     tags-ignore:
       - "v*"
-      - "*.*.*"    # ignore tags; Docker workflow will handle those
+      - "*.*.*"    # ignore tags; Publish workflow will handle those
   pull_request:
     branches:
       - "**"
