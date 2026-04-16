@@ -24,8 +24,7 @@ jobs:
         id: vars
         run: |
           RAW="${{ github.event.inputs.version }}"
-          # If user passes 1.2.3, we treat tag as v1.2.3
-          VERSION="${RAW#v}"
+          VERSION="${RAW#v}"      # strip leading v if present
           TAG="v${VERSION}"
 
           IFS='.' read -r MAJOR MINOR PATCH <<EOF
@@ -64,7 +63,7 @@ jobs:
             RANGE="$CURRENT_TAG"
           fi
 
-          git log --format="%s" $RANGE > commits.txt || true
+          git log --format="%h||%s" $RANGE > commits.txt || true
 
           FEAT_SECTION=""
           FIX_SECTION=""
@@ -72,8 +71,10 @@ jobs:
           DOCS_SECTION=""
           OTHER_SECTION=""
 
-          while IFS= read -r line; do
-            case "$line" in
+          while IFS='||' read -r hash subject; do
+            [ -z "$subject" ] && continue
+            line="[\`$hash\`](https://github.com/${GITHUB_REPOSITORY}/commit/$hash): $subject"
+            case "$subject" in
               "feat:"*|"feat("*)
                 FEAT_SECTION="${FEAT_SECTION}- ${line}\n"
                 ;;
@@ -125,6 +126,7 @@ jobs:
       - name: Generate release body
         id: body
         run: |
+          TAG="${{ steps.vars.outputs.tag }}"
           VERSION="${{ steps.vars.outputs.version }}"
           MAJOR="${{ steps.vars.outputs.major }}"
           MINOR="${{ steps.vars.outputs.minor }}"
@@ -149,9 +151,12 @@ jobs:
           - `ghcr.io/azstrait/yomama-api:latest`
           - `ghcr.io/azstrait/yomama-api:build-SHORT_SHA`
 
+          See all images at:
+          https://github.com/azstrait/yomama-api/pkgs/container/yomama-api
+
           ## Usage
 
-          See the README for `docker-compose.yml` examples and environment variables.
+          See the [README](https://github.com/azstrait/yomama-api/blob/vVERSION/README.md#running-via-docker) for Docker usage:
           EOF
 
           # Replace placeholders
@@ -159,8 +164,8 @@ jobs:
           sed -i "s/vMINOR/v${MINOR}/g" RELEASE_BODY.md
           sed -i "s/vPATCH/v${PATCH}/g" RELEASE_BODY.md
           sed -i "s/SHORT_SHA/${SHORT_SHA}/g" RELEASE_BODY.md
+          sed -i "s/vVERSION/v${VERSION}/g" RELEASE_BODY.md
 
-          # Insert changelog content
           perl -0pi -e "s/CHANGELOG_PLACEHOLDER/${CHANGELOG//\//\\/}/" RELEASE_BODY.md
 
           echo "body_path=RELEASE_BODY.md" >> $GITHUB_OUTPUT
