@@ -117,29 +117,36 @@ jobs:
             CHANGELOG="(No commits found for this range.)\n"
           fi
 
-          # Write multiline changelog to GITHUB_OUTPUT
-          {
-            echo "changelog<<EOF"
-            printf "%b" "$CHANGELOG"
-            echo "EOF"
-          } >> "$GITHUB_OUTPUT"
+          # Write changelog to a file
+          printf "%b" "$CHANGELOG" > CHANGELOG_SECTION.md
 
       - name: Generate release body
         id: body
         run: |
-          RAW_TAG="${{ steps.vars.outputs.raw_tag }}"
+          TAG="${{ steps.vars.outputs.tag }}"
           VERSION="${{ steps.vars.outputs.version }}"
           MAJOR="${{ steps.vars.outputs.major }}"
           MINOR="${{ steps.vars.outputs.minor }}"
           PATCH="${{ steps.vars.outputs.patch }}"
           SHORT_SHA="${{ steps.vars.outputs.short_sha }}"
 
+          # Header and changelog title
           cat << 'EOF' > RELEASE_BODY.md
           A new version of **yomama-api** is out! 🎉
 
           ## Changelog
 
-          CHANGELOG_PLACEHOLDER
+          EOF
+
+          # Append the generated changelog section, if it exists
+          if [ -f CHANGELOG_SECTION.md ]; then
+            cat CHANGELOG_SECTION.md >> RELEASE_BODY.md
+          else
+            echo "(No commits found for this range.)" >> RELEASE_BODY.md
+          fi
+
+          # Append Docker tags and usage
+          cat << 'EOF' >> RELEASE_BODY.md
 
           ## Docker Tags
 
@@ -159,31 +166,12 @@ jobs:
           See the [README](https://github.com/azstrait/yomama-api/blob/vVERSION/README.md#running-via-docker) for Docker usage:
           EOF
 
-          # Replace version placeholders
+          # Replace placeholders for version info
           sed -i "s/vMAJOR/v${MAJOR}/g" RELEASE_BODY.md
           sed -i "s/vMINOR/v${MINOR}/g" RELEASE_BODY.md
           sed -i "s/vPATCH/v${PATCH}/g" RELEASE_BODY.md
           sed -i "s/SHORT_SHA/${SHORT_SHA}/g" RELEASE_BODY.md
           sed -i "s/vVERSION/v${VERSION}/g" RELEASE_BODY.md
-
-          # Insert changelog where the placeholder line is
-          awk '
-            /CHANGELOG_PLACEHOLDER/ {
-              # Print the changelog from the Actions output
-              print "---CHANGELOG_START---"
-              print "'"${{ steps.changelog.outputs.changelog }}"'"
-              print "---CHANGELOG_END---"
-              next
-            }
-            { print }
-          ' RELEASE_BODY.md > RELEASE_BODY.tmp
-
-          mv RELEASE_BODY.tmp RELEASE_BODY.md
-
-          # Remove the marker lines
-          sed -i "/---CHANGELOG_START---/d" RELEASE_BODY.md
-          sed -i "/---CHANGELOG_END---/d" RELEASE_BODY.md
-          sed -i "/CHANGELOG_PLACEHOLDER/d" RELEASE_BODY.md
 
           echo "body_path=RELEASE_BODY.md" >> "$GITHUB_OUTPUT"
 
