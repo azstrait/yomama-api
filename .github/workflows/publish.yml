@@ -267,7 +267,6 @@ jobs:
           MINOR="${{ steps.vars.outputs.minor }}"
           PATCH="${{ steps.vars.outputs.patch }}"
           SHORT_SHA="${{ steps.vars.outputs.short_sha }}"
-          CHANGELOG="${{ steps.changelog.outputs.changelog }}"
 
           cat << 'EOF' > RELEASE_BODY.md
           A new version of **yomama-api** is out! 🎉
@@ -294,13 +293,16 @@ jobs:
           See the [README](https://github.com/azstrait/yomama-api/blob/vVERSION/README.md#running-via-docker) for Docker usage:
           EOF
 
+          # Replace placeholders for version info
           sed -i "s/vMAJOR/v${MAJOR}/g" RELEASE_BODY.md
           sed -i "s/vMINOR/v${MINOR}/g" RELEASE_BODY.md
           sed -i "s/vPATCH/v${PATCH}/g" RELEASE_BODY.md
           sed -i "s/SHORT_SHA/${SHORT_SHA}/g" RELEASE_BODY.md
           sed -i "s/vVERSION/v${VERSION}/g" RELEASE_BODY.md
 
-          perl -0pi -e "s/CHANGELOG_PLACEHOLDER/${CHANGELOG//\//\\/}/" RELEASE_BODY.md
+          # Insert changelog content from the GitHub Actions output directly.
+          # Use a here-doc to safely pass multi-line content into perl.
+          perl -0pi -e "s/CHANGELOG_PLACEHOLDER/$(printf '%s' '${{ steps.changelog.outputs.changelog }}' | sed 's/[&/]/\\&/g')/" RELEASE_BODY.md
 
           echo "body_path=RELEASE_BODY.md" >> $GITHUB_OUTPUT
 
