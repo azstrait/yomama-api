@@ -58,3 +58,9 @@ hypothesis/
 
 # Logs
 *.log
+
+# Dependency directories
+node_modules/
+
+# Other
+scripts/run_linters.py

@@ -1,0 +1,35 @@
+{
+  "name": "yomama-api",
+  "version": "1.0.0",
+  "description": "A self-hostable RESTful web app + API for “Yo Mama” jokes, powered by FastAPI and backed by a simple CSV/TSV file.",
+  "main": "index.js",
+  "directories": {
+    "test": "tests"
+  },
+  "scripts": {
+    "lint:js": "eslint app/**/*.{js,mjs,cjs}",
+    "lint:css": "eslint app/**/*.css",
+    "lint:md": "eslint **/*.md",
+    "lint:html": "htmlhint app/**/*.html"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/azstrait/yomama-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/azstrait/yomama-api/issues"
+  },
+  "homepage": "https://github.com/azstrait/yomama-api#readme",
+  "devDependencies": {
+    "@eslint/css": "^1.1.0",
+    "@eslint/js": "^10.0.1",
+    "@eslint/markdown": "^8.0.1",
+    "eslint": "^10.2.0",
+    "globals": "^17.5.0",
+    "htmlhint": "^1.9.2"
+  }
+}

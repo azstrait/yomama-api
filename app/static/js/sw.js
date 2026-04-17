@@ -1,3 +1,4 @@
+/* eslint-disable no-unused-vars */
 self.addEventListener("install", (event) => {
   // Skip waiting so new SW takes control ASAP
   self.skipWaiting();

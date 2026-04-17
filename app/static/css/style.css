@@ -355,7 +355,7 @@ body.loading {
 
 /* Inline code styling (e.g., in API Endpoints list) */
 code {
-  font-family: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Monaco,
+  font-family: "JetBrains Mono", SFMono-Regular, Menlo, Monaco,
     Consolas, "Liberation Mono", "Courier New", monospace;
   font-size: 0.85em;
   background-color: rgba(15, 23, 42, 0.9);
