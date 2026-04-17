@@ -61,7 +61,7 @@ def main():
     subprocess.check_call(["git", "tag", f"v{new}"])
 
     print(f"Created tag v{new}. You can now push with:")
-    print(f"  git push && git push origin v{new}")
+    print(f"  git push origin main && git push origin v{new}")
 
 
 if __name__ == "__main__":
