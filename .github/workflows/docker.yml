@@ -8,6 +8,9 @@ on:
         required: true
         type: string
 
+env:
+  IMAGE_NAME: ghcr.io/${{ github.repository }}
+
 jobs:
   # Run all lint/tests once before building images
   ci:
@@ -94,9 +97,6 @@ jobs:
       contents: read
       packages: write
 
-    env:
-      IMAGE_NAME: ghcr.io/azstrait/yomama-api
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -156,9 +156,6 @@ jobs:
     permissions:
       contents: read
       packages: write
-
-    env:
-      IMAGE_NAME: ghcr.io/azstrait/yomama-api
 
     steps:
       - name: Checkout repository
