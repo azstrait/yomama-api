@@ -282,22 +282,34 @@ The repository uses semantic-style version tags to drive Docker builds via GitHu
 
 On a new version tag (e.g. `v1.2.3`), the “Publish” workflow will:
 
-1. Run lint (Black) and tests (pytest).
-2. Build a multi-arch image (`linux/amd64`, `linux/arm64`) from `docker/Dockerfile`.
-3. Push the image to GHCR with the following tags:
+1. Run lint (Black), tests (pytest), and the jokes linter (plus optional npm linters).
+2. Build single-arch images for:
+   - `linux/amd64` (on `ubuntu-latest`)
+   - `linux/arm64` (on `ubuntu-24.04-arm`)
+3. Push the single-arch images to GHCR with the following tags:
 
-- `ghcr.io/azstrait/yomama-api:v1`
-- `ghcr.io/azstrait/yomama-api:v1.2`
-- `ghcr.io/azstrait/yomama-api:v1.2.3`
-- `ghcr.io/azstrait/yomama-api:latest`
-- `ghcr.io/azstrait/yomama-api:build-<short-commit>`
+   - `ghcr.io/azstrait/yomama-api:v1-amd64`
+   - `ghcr.io/azstrait/yomama-api:v1.2-amd64`
+   - `ghcr.io/azstrait/yomama-api:v1.2.3-amd64`
+   - `ghcr.io/azstrait/yomama-api:v1-arm64`
+   - `ghcr.io/azstrait/yomama-api:v1.2-arm64`
+   - `ghcr.io/azstrait/yomama-api:v1.2.3-arm64`
 
-This makes it easy to pin:
+4. Create multi-arch manifests (combining `amd64` and `arm64`) for:
 
-- Major only: `v1`
-- Minor: `v1.2`
-- Exact patch: `v1.2.3`
-- Or always follow the latest: `latest`.
+   - `ghcr.io/azstrait/yomama-api:v1`
+   - `ghcr.io/azstrait/yomama-api:v1.2`
+   - `ghcr.io/azstrait/yomama-api:v1.2.3`
+   - `ghcr.io/azstrait/yomama-api:latest`
+   - `ghcr.io/azstrait/yomama-api:build-<short-commit>`
+
+This makes it easy to:
+
+- Pin to a **major** series: `v1`
+- Pin to a **minor** series: `v1.2`
+- Pin to an **exact patch**: `v1.2.3`
+- Always follow the latest: `latest`
+- Or explicitly choose architecture-specific tags (e.g. `v1.2.3-amd64` or `v1.2.3-arm64`).
 
 You can browse all published images here:
 
