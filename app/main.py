@@ -123,10 +123,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # Swagger UI: needs inline scripts/styles
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
-                "script-src 'self' 'unsafe-inline' https://unpkg.com; "
+                "script-src 'self' 'unsafe-inline' https://unpkg.com https://static.cloudflareinsights.com; "
                 "style-src 'self' 'unsafe-inline' https://unpkg.com https://fonts.cdnfonts.com; "
                 "img-src 'self' data: https://fastapi.tiangolo.com; "
-                "connect-src 'self' https://unpkg.com; "
+                "connect-src 'self' https://unpkg.com https://cloudflareinsights.com; "
                 "font-src 'self' data: https://fonts.cdnfonts.com; "
                 "frame-ancestors 'none'; "
             )
@@ -134,10 +134,10 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             # Rest of the app can be stricter
             response.headers["Content-Security-Policy"] = (
                 "default-src 'self'; "
-                "script-src 'self'; "
+                "script-src 'self' https://static.cloudflareinsights.com; "
                 "style-src 'self' https://fonts.cdnfonts.com; "
                 "img-src 'self' data:; "
-                "connect-src 'self'; "
+                "connect-src 'self' https://cloudflareinsights.com; "
                 "font-src 'self' data: https://fonts.cdnfonts.com; "
                 "frame-ancestors 'none'; "
             )
