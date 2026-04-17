@@ -160,8 +160,8 @@ jobs:
       - name: Extract version info from tag
         id: vars
         run: |
-          RAW_TAG="${GITHUB_REF_NAME}"
-          VERSION="${RAW_TAG#v}"
+          RAW_TAG="${GITHUB_REF_NAME}"          # e.g. v1.2.3 or 1.2.3
+          VERSION="${RAW_TAG#v}"                # 1.2.3
 
           IFS='.' read -r MAJOR MINOR PATCH <<EOF
           ${VERSION}
@@ -198,7 +198,8 @@ jobs:
             RANGE="$CURRENT_TAG"
           fi
 
-          git log --format="%h||%s" $RANGE > commits.txt || true
+          # hash + subject, separated by space
+          git log --format="%h %s" $RANGE > commits.txt || true
 
           FEAT_SECTION=""
           FIX_SECTION=""
@@ -206,24 +207,28 @@ jobs:
           DOCS_SECTION=""
           OTHER_SECTION=""
 
-          while IFS='||' read -r hash subject; do
-            [ -z "$subject" ] && continue
-            line="[\`$hash\`](https://github.com/${GITHUB_REPOSITORY}/commit/$hash): $subject"
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            hash="${line%% *}"          # first word = short SHA
+            subject="${line#* }"        # rest of the line = subject
+
+            link="[\`$hash\`](https://github.com/${GITHUB_REPOSITORY}/commit/$hash): $subject"
+
             case "$subject" in
               "feat:"*|"feat("*)
-                FEAT_SECTION="${FEAT_SECTION}- ${line}\n"
+                FEAT_SECTION="${FEAT_SECTION}- ${link}\n"
                 ;;
               "fix:"*|"fix("*)
-                FIX_SECTION="${FIX_SECTION}- ${line}\n"
+                FIX_SECTION="${FIX_SECTION}- ${link}\n"
                 ;;
               "chore:"*|"chore("*)
-                CHORE_SECTION="${CHORE_SECTION}- ${line}\n"
+                CHORE_SECTION="${CHORE_SECTION}- ${link}\n"
                 ;;
               "docs:"*|"docs("*)
-                DOCS_SECTION="${DOCS_SECTION}- ${line}\n"
+                DOCS_SECTION="${DOCS_SECTION}- ${link}\n"
                 ;;
               *)
-                OTHER_SECTION="${OTHER_SECTION}- ${line}\n"
+                OTHER_SECTION="${OTHER_SECTION}- ${link}\n"
                 ;;
             esac
           done < commits.txt
@@ -249,14 +254,11 @@ jobs:
           fi
 
           if [ -z "$CHANGELOG" ]; then
-            CHANGELOG="(No commits found for this range.)"
+            CHANGELOG="(No commits found for this range.)\n"
           fi
 
-          CHANGELOG_ESCAPED=$(printf "%s" "$CHANGELOG" | sed 's/\\/\\\\/g')
-
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          printf "%s\n" "$CHANGELOG_ESCAPED" >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
+          # Write changelog to a file
+          printf "%b" "$CHANGELOG" > CHANGELOG_SECTION.md
 
       - name: Generate release body
         id: body
@@ -268,12 +270,23 @@ jobs:
           PATCH="${{ steps.vars.outputs.patch }}"
           SHORT_SHA="${{ steps.vars.outputs.short_sha }}"
 
+          # Header and changelog title
           cat << 'EOF' > RELEASE_BODY.md
           A new version of **yomama-api** is out! 🎉
 
           ## Changelog
 
-          CHANGELOG_PLACEHOLDER
+          EOF
+
+          # Append the generated changelog section, if it exists
+          if [ -f CHANGELOG_SECTION.md ]; then
+            cat CHANGELOG_SECTION.md >> RELEASE_BODY.md
+          else
+            echo "(No commits found for this range.)" >> RELEASE_BODY.md
+          fi
+
+          # Append Docker tags and usage
+          cat << 'EOF' >> RELEASE_BODY.md
 
           ## Docker Tags
 
@@ -300,11 +313,7 @@ jobs:
           sed -i "s/SHORT_SHA/${SHORT_SHA}/g" RELEASE_BODY.md
           sed -i "s/vVERSION/v${VERSION}/g" RELEASE_BODY.md
 
-          # Insert changelog content from the GitHub Actions output directly.
-          # Use a here-doc to safely pass multi-line content into perl.
-          perl -0pi -e "s/CHANGELOG_PLACEHOLDER/$(printf '%s' '${{ steps.changelog.outputs.changelog }}' | sed 's/[&/]/\\&/g')/" RELEASE_BODY.md
-
-          echo "body_path=RELEASE_BODY.md" >> $GITHUB_OUTPUT
+          echo "body_path=RELEASE_BODY.md" >> "$GITHUB_OUTPUT"
 
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
