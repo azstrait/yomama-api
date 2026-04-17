@@ -48,7 +48,7 @@ body.loading {
 
 .logo-img {
   display: block;
-  height: 35px;
+  max-height: 35px;
   width: auto;
 }
 
