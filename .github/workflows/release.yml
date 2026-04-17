@@ -51,7 +51,7 @@ jobs:
       - name: Generate changelog from commits
         id: changelog
         run: |
-          CURRENT_TAG="${{ steps.vars.outputs.tag }}"
+          CURRENT_TAG="${GITHUB_REF_NAME:-${{ steps.vars.outputs.tag }}}"
           PREV_TAG="${{ steps.prev.outputs.prev_tag }}"
 
           echo "Generating changelog for range:"
@@ -63,7 +63,8 @@ jobs:
             RANGE="$CURRENT_TAG"
           fi
 
-          git log --format="%h||%s" $RANGE > commits.txt || true
+          # hash + subject, separated by space
+          git log --format="%h %s" $RANGE > commits.txt || true
 
           FEAT_SECTION=""
           FIX_SECTION=""
@@ -71,24 +72,28 @@ jobs:
           DOCS_SECTION=""
           OTHER_SECTION=""
 
-          while IFS='||' read -r hash subject; do
-            [ -z "$subject" ] && continue
-            line="[\`$hash\`](https://github.com/${GITHUB_REPOSITORY}/commit/$hash): $subject"
+          while IFS= read -r line; do
+            [ -z "$line" ] && continue
+            hash="${line%% *}"          # first word = short SHA
+            subject="${line#* }"        # rest of the line = subject
+
+            link="[\`$hash\`](https://github.com/${GITHUB_REPOSITORY}/commit/$hash): $subject"
+
             case "$subject" in
               "feat:"*|"feat("*)
-                FEAT_SECTION="${FEAT_SECTION}- ${line}\n"
+                FEAT_SECTION="${FEAT_SECTION}- ${link}\n"
                 ;;
               "fix:"*|"fix("*)
-                FIX_SECTION="${FIX_SECTION}- ${line}\n"
+                FIX_SECTION="${FIX_SECTION}- ${link}\n"
                 ;;
               "chore:"*|"chore("*)
-                CHORE_SECTION="${CHORE_SECTION}- ${line}\n"
+                CHORE_SECTION="${CHORE_SECTION}- ${link}\n"
                 ;;
               "docs:"*|"docs("*)
-                DOCS_SECTION="${DOCS_SECTION}- ${line}\n"
+                DOCS_SECTION="${DOCS_SECTION}- ${link}\n"
                 ;;
               *)
-                OTHER_SECTION="${OTHER_SECTION}- ${line}\n"
+                OTHER_SECTION="${OTHER_SECTION}- ${link}\n"
                 ;;
             esac
           done < commits.txt
